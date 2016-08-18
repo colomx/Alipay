@@ -1,18 +1,18 @@
 <?php
 return [
 
-	// 安全检验码，以数字和字母组成的32位字符。
+	// Security code, 32 characters in length
 	'key' => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
 
-	// 签名方式
+	// Sign Type
 	'sign_type' => 'RSA',
 
-	// 商户私钥。
+	// Merchant Private Key
 	'private_key_path' => __DIR__ . '/key/private_key.pem',
 
-	// 阿里公钥。
+	// Public Key
 	'public_key_path' => __DIR__ . '/key/public_key.pem',
 
-	// 异步通知连接。
+	// Asynchronous Notify URL
 	'notify_url' => 'http://xxx'
 ];
