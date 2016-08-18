@@ -56,7 +56,7 @@ class SdkPayment
 	}
 
 	/**
-	 * 取得支付链接
+	 * Get Pay Link
 	 */
 	public function getPayLink()
 	{
@@ -85,29 +85,29 @@ class SdkPayment
 	}
 
 	/**
-	 * 验证消息是否是支付宝发出的合法消息
+	 * Verify If the message is sent from Alipay and its validity
 	 */
 	public function verify()
 	{
-		// 判断请求是否为空
+		// Verify if the request is null
 		if (empty($_POST) && empty($_GET)) {
 			return false;
 		}
 
 		$data = $_POST ?  : $_GET;
 
-		// 生成签名结果
+		// Generate the signature
 		$is_sign = $this->getSignVeryfy($data, $data['sign']);
 
-		// 获取支付宝远程服务器ATN结果（验证是否是支付宝发来的消息）
+		// Get the ATN result of Alipay Servers (Verify if messages are from Alipay)
 		$response_txt = 'true';
 		if (! empty($data['notify_id'])) {
 			$response_txt = $this->getResponse($data['notify_id']);
 		}
 
-		// 验证
-		// $response_txt的结果不是true，与服务器设置问题、合作身份者ID、notify_id一分钟失效有关
-		// isSign的结果不是true，与安全校验码、请求时的参数格式（如：带自定义参数等）、编码格式有关
+		// Verify
+		// If the result of $response_txt is not true, it's related to server configuration, Partner ID, notify_id expiring in 1min.
+		// if the result of isSign is not true, it's related to Security code, parameters in request(eg. customized parameters), encoding format etc.
 		if (preg_match('/true$/i', $response_txt) && $is_sign) {
 			return true;
 		} else {
