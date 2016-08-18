@@ -1,15 +1,15 @@
 <?php
 return [
 
-	// 安全检验码，以数字和字母组成的32位字符。
+	// Security code, it's a mix of numbers and characters in 32 bytes.
 	'key' => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
 
-	//签名方式
+	//Sign type
 	'sign_type' => 'MD5',
 
-	// 服务器异步通知页面路径。
+	// Asynchronous Notify URL
 	'notify_url' => 'http://xxx',
 
-	// 页面跳转同步通知页面路径。
+	// Return URL
 	'return_url' => 'http://xxx'
 ];
