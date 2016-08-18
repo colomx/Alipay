@@ -52,7 +52,7 @@ class SdkPayment
 	}
 
 	/**
-	 * 取得支付链接参数
+	 * Get Pay Link
 	 */
 	public function getPayPara()
 	{
@@ -78,29 +78,29 @@ class SdkPayment
 	}
 
 	/**
-	 * 验证消息是否是支付宝发出的合法消息
+	 * Verify If the message is sent from Alipay and its validity
 	 */
 	public function verify()
 	{
-		// 判断请求是否为空
+		// Verify if the request is null
 		if (empty($_POST) && empty($_GET)) {
 			return false;
 		}
 
 		$data = $_POST ?  : $_GET;
 
-		// 生成签名结果
+		// Generate the signature
 		$is_sign = $this->getSignVeryfy($data, $data['sign']);
 
-		// 获取支付宝远程服务器ATN结果（验证是否是支付宝发来的消息）
+		// Get the ATN result of Alipay Servers (Verify if messages are from Alipay)
 		$response_txt = 'true';
 		if (! empty($data['notify_id'])) {
 			$response_txt = $this->getResponse($data['notify_id']);
 		}
 
-		// 验证
-		// $response_txt的结果不是true，与服务器设置问题、合作身份者ID、notify_id一分钟失效有关
-		// isSign的结果不是true，与安全校验码、请求时的参数格式（如：带自定义参数等）、编码格式有关
+		// Verify
+		// If the result of $response_txt is not true, it's related to server configuration, Partner ID, notify_id expiring in 1min.
+		// if the result of isSign is not true, it's related to Security code, parameters in request(eg. customized parameters), encoding format etc.
 		if (preg_match('/true$/i', $response_txt) && $is_sign) {
 			return true;
 		} else {
@@ -175,22 +175,22 @@ class SdkPayment
 	}
 
 	/**
-	 * 生成要请求给支付宝的参数数组
-	 * @param $para_temp 请求前的参数数组
-	 * @return 要请求的参数数组
+	 * Generate the parameters to submit to Alipay
+	 * @param $para_temp is parameter array before request
+	 * @return is the parameter array to be requested
 	 */
 	private function buildRequestPara($para_temp)
 	{
-		//除去待签名参数数组中的空值和签名参数
+		//Remove the null and signature parameters in parameter array that is to be signed
 		$para_filter = $this->paraFilter($para_temp);
 
-		//对待签名参数数组排序
+		//Sort orders for parameter array that is to be signed
 		$para_sort = $this->argSort($para_filter);
 
-		//生成签名结果
+		//Generate the Signature
 		$mysign = $this->buildRequestMysign($para_sort);
 
-		//签名结果与签名方式加入请求提交参数组中
+		//Add sign result and sign type to parameter array
 		$para_sort['sign'] = $mysign;
 		$para_sort['sign_type'] = strtoupper(trim($this->sign_type));
 
@@ -198,13 +198,13 @@ class SdkPayment
 	}
 
 	/**
-	 * 生成签名结果
-	 * @param $para_sort 已排序要签名的数组
-	 * return 签名结果字符串
+	 * Generate the Signature
+	 * @param $para_sort is the array that already sorted but need the signature
+	 * return is the string of signature
 	 */
 	private function buildRequestMysign($para_sort)
 	{
-		//把数组所有元素，按照“参数=参数值”的模式用“&”字符拼接成字符串
+		//Put all elements in array into the string with format of "Parameter = Value", connecting with "&".
 		$prestr = $this->createLinkstring($para_sort);
 
 		$mysign = '';
@@ -223,20 +223,20 @@ class SdkPayment
 	}
 
 	/**
-	 * 获取返回时的签名验证结果
-	 * @param $para_temp 通知返回来的参数数组
-	 * @param $sign 返回的签名结果
-	 * @return 签名验证结果
+	 * Get the signature verifcation result in returning
+	 * @param $para_temp is the returned parameter array (通知返回来的参数数组)
+	 * @param $sign is the returned signature result
+	 * @return is the signature verification result
 	 */
 	function getSignVeryfy($para_temp, $sign)
 	{
-		//除去待签名参数数组中的空值和签名参数
+		//Remove the null and signatures parameters for parameter array thta is to be signed
 		$para_filter = $this->paraFilter($para_temp);
 
-		//对待签名参数数组排序
+		//Sort order for parameters array that is to be signed
 		$para_sort = $this->argSort($para_filter);
 
-		//把数组所有元素，按照“参数=参数值”的模式用“&”字符拼接成字符串
+		//Put all elements in array into the string with format of "Parameter = Value", connecting with "&". 
 		$prestr = $this->createLinkstring($para_sort);
 
 		$is_sgin = false;
@@ -255,9 +255,9 @@ class SdkPayment
 	}
 
 	/**
-	 * 除去数组中的空值和签名参数
-	 * @param $para 签名参数组
-	 * return 去掉空值与签名参数后的新签名参数组
+	 * Remove the null and signature parameters in array
+	 * @param $para is the Signature parameters array
+	 * return The new Signature parameters array after removing null and signature parameters
 	 */
 	private function paraFilter($para)
 	{
@@ -273,9 +273,9 @@ class SdkPayment
 	}
 
 	/**
-	 * 对数组排序
-	 * @param $para 排序前的数组
-	 * return 排序后的数组
+	 * Sort Orders For Array
+	 * @param $para is the array before sorting orders
+	 * return is the array after sorting orders
 	 */
 	private function argSort($para)
 	{
@@ -285,11 +285,11 @@ class SdkPayment
 	}
 
 	/**
-	 * RSA验签
-	 * @param $data 待签名数据
-	 * @param $ali_public_key_path 支付宝的公钥文件路径
-	 * @param $sign 要校对的的签名结果
-	 * return 验证结果
+	 * RSA Signature Verification
+	 * @param $data is the data to be signed
+	 * @param $ali_public_key_path is the Alipay Public Key path
+	 * @param $sign is the signature result to be verified
+	 * return is verification result
 	 */
 	private function rsaVerify($data, $public_key_path, $sign)
 	{
@@ -301,10 +301,10 @@ class SdkPayment
 	}
 
 	/**
-	 * RSA签名
-	 * @param $data 待签名数据
-	 * @param $private_key_path 商户私钥文件路径
-	 * return 签名结果
+	 * RSA Signature
+	 * @param $data is the data to be signed
+	 * @param $private_key_path is the path of merchant private key
+	 * return is signature result
 	 */
 	private function rsaSign($data, $private_key_path)
 	{
@@ -312,15 +312,15 @@ class SdkPayment
 		$res = openssl_get_privatekey($priKey);
 		openssl_sign($data, $sign, $res);
 		openssl_free_key($res);
-		//base64编码
+		//base64 encoding
 		$sign = base64_encode($sign);
 		return $sign;
 	}
 
 	/**
-	 * 把数组所有元素，按照“参数=参数值”的模式用“&”字符拼接成字符串
-	 * @param $para 需要拼接的数组
-	 * return 拼接完成以后的字符串
+	 * Put all elements in array into the string with format of "Parameter = Value", connecting with "&".
+	 * @param $para is the array to be put into string
+	 * return is the string
 	 */
 	private function createLinkstring($para)
 	{
@@ -328,10 +328,10 @@ class SdkPayment
 		while ((list ($key, $val) = each($para)) == true) {
 			$arg .= $key . '=' . $val . '&';
 		}
-		//去掉最后一个&字符
+		//Remove the Last "&"
 		$arg = substr($arg, 0, count($arg) - 2);
 
-		//如果存在转义字符，那么去掉转义
+		//If there's any slashes, remove slashes
 		if (get_magic_quotes_gpc()) {
 			$arg = stripslashes($arg);
 		}
@@ -340,9 +340,9 @@ class SdkPayment
 	}
 
 	/**
-	 * 把数组所有元素，按照“参数=参数值”的模式用“&”字符拼接成字符串，并对字符串做urlencode编码
-	 * @param $para 需要拼接的数组
-	 * return 拼接完成以后的字符串
+	 * Put all elements in array into the string with format of "Parameter = Value", connecting with "&". and make the string into urlencode.
+	 * @param $para is the array to be put into string
+	 * return is the string
 	 */
 	private function createLinkstringUrlencode($para)
 	{
@@ -350,10 +350,10 @@ class SdkPayment
 		while ((list ($key, $val) = each($para)) == true) {
 			$arg .= $key . '=' . urlencode($val) . '&';
 		}
-		//去掉最后一个&字符
+		//Remove the last "&"
 		$arg = substr($arg, 0, count($arg) - 2);
 
-		//如果存在转义字符，那么去掉转义
+		//If there's any slashes, remove slashes
 		if (get_magic_quotes_gpc()) {
 			$arg = stripslashes($arg);
 		}
@@ -362,13 +362,13 @@ class SdkPayment
 	}
 
 	/**
-	 * 获取远程服务器ATN结果,验证返回URL
-	 * @param $notify_id 通知校验ID
-	 * @return 服务器ATN结果
-	 * 验证结果集：
-	 * invalid命令参数不对 出现这个错误，请检测返回处理中partner和key是否为空
-	 * true 返回正确信息
-	 * false 请检查防火墙或者是服务器阻止端口问题以及验证时间是否超过一分钟
+	 * Get ATN result from remote servers, verify it and return to URL
+	 * @param $notify_id is the notify ID
+	 * @return is the ATN result from remote servers
+	 * Verification Results:
+	 * invalid - Parameters incorrect, pleaes check if  partner and key in return data are null.
+	 * true - Return correct info
+	 * false - Please check firewall or server ports, and confirm if the verify time has been over 1 min.
 	 */
 	private function getResponse($notify_id)
 	{
@@ -387,24 +387,24 @@ class SdkPayment
 	}
 
 	/**
-	 * 远程获取数据，GET模式
-	 * 注意：
-	 * 1.使用Crul需要修改服务器中php.ini文件的设置，找到php_curl.dll去掉前面的";"就行了
-	 * 2.文件夹中cacert.pem是SSL证书请保证其路径有效，目前默认路径是：getcwd().'\\cacert.pem'
-	 * @param $url 指定URL完整路径地址
-	 * @param $cacert_url 指定当前工作目录绝对路径
-	 * return 远程输出的数据
+	 * Get data remotely - GET mode
+	 * Notice: 
+	 * 1.To use curl you need to change configuration in php.ini on your server, find php_curl.dll and uncomment it
+	 * 2.cacert.pem is the SSL cert and please make sure the path for it is correct, the default path is getcwd().'\\cacert.pem'
+	 * @param $url is to Specify URL full path address
+	 * @param $cacert_url is to Specify the absolute path of the current working directory
+	 * return is the data output remotely
 	 */
 	private function getHttpResponseGET($url, $cacert_url)
 	{
 		$curl = curl_init($url);
-		curl_setopt($curl, CURLOPT_HEADER, 0); // 过滤HTTP头
-		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1); // 显示输出结果
-		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true); //SSL证书认证
-		curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 2); //严格认证
-		curl_setopt($curl, CURLOPT_CAINFO, $cacert_url); //证书地址
+		curl_setopt($curl, CURLOPT_HEADER, 0); // Filter HTTP header
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1); // Show Output
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true); //SSL Cert Verification
+		curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 2); //Strict Verification
+		curl_setopt($curl, CURLOPT_CAINFO, $cacert_url); //Cert location
 		$responseText = curl_exec($curl);
-		//var_dump( curl_error($curl) );//如果执行curl过程中出现异常，可打开此开关，以便查看异常内容
+		//var_dump( curl_error($curl) );//If you get any problem when excuting curl you can enable it for better troubleshooting.
 		curl_close($curl);
 
 		return $responseText;
