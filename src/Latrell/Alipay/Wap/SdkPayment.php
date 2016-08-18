@@ -360,13 +360,13 @@ class SdkPayment
 	 */
 	private function getSignVeryfy($para_temp, $sign)
 	{
-		//除去待签名参数数组中的空值和签名参数
+		//Remove the null and signatures parameters for parameter array thta is to be signed
 		$para_filter = $this->paraFilter($para_temp);
 
-		//对待签名参数数组排序
+		//Sort order for parameters array that is to be signed
 		$para_sort = $this->argSort($para_filter);
 
-		//把数组所有元素，按照“参数=参数值”的模式用“&”字符拼接成字符串
+		//Put all elements in array into the string with format of "Parameter = Value", connecting with "&". 
 		$prestr = $this->createLinkstring($para_sort);
 
 		$is_sgin = false;
